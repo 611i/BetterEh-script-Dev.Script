@@ -1,49 +1,20 @@
-local Players = game:GetService("Players")
-local HttpService = game:GetService("HttpService")
-local LocalPlayer = Players.LocalPlayer
 local RunService = game:GetService("RunService")
+local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local CoreGui = game:GetService("CoreGui")
 local UserInputService = game:GetService("UserInputService")
+local LocalPlayer = Players.LocalPlayer
 local Camera = workspace.CurrentCamera
 local Lighting = game:GetService("Lighting")
 
--- 🔗 رابط الـ Raw الخاص بك
-local OFFICIAL_RAW_URL = "https://raw.githubusercontent.com/611i/BetterEh-script-Dev.Script/refs/heads/main/dev.lua"
-
--- 🚨 رابط الويب هوك الخاص بك
-local ALERT_WEBHOOK_URL = "https://discord.com/api/webhooks/1544739752010457110/AAhQiDGxu7mxQfR7BKmux13q72M7BtiEB6nvtbAB_f7OHX-N5VYitXzqbq-RMJst-2cL"
-
--- فحص أمان المصدر (Anti-Leak & Tamper Protection)
-pcall(function()
-    local success, fetchedCode = pcall(function()
-        return game:HttpGet(OFFICIAL_RAW_URL)
-    end)
-    
-    if not success or not fetchedCode then
-        pcall(function()
-            local alertMsg = "🚨 **تنبيه محاولة سرقة أو تعديل على السكربت!**\n\n👤 **يوزر السارق:** " .. LocalPlayer.Name .. "\n🆔 **ID السارق:** " .. LocalPlayer.UserId .. "\n⚠️ **الحالة:** قام بنسخ الكود أو محاولة تعديله وتشغيله من مصدر غير مصرح به!"
-            local data = { ["content"] = alertMsg }
-            local body = HttpService:JSONEncode(data)
-            local headers = { ["content-type"] = "application/json" }
-            local requestFunc = syn and syn.request or http_request or request or HttpPost
-            if requestFunc then
-                requestFunc({ Url = ALERT_WEBHOOK_URL, Method = "POST", Headers = headers, Body = body })
-            end
-        end)
-    end
-end)
-
---------------------------------------------------------------------------------
--- [ الكود الأصلي الشغال 100% ]
---------------------------------------------------------------------------------
-
 local ShootEvent = ReplicatedStorage:WaitForChild("shared/network@GlobalEvents"):WaitForChild("shoot")
 
+-- نسخ رابط الديسكورد تلقائياً أول ما يشتغل السكربت في الحافظة
 pcall(function()
     setclipboard("https://discord.gg/4hDr9Zb7P")
 end)
 
+-- إعدادات السكربت والـ Config الافتراضية (شغال تماماً)
 local DefaultConfig = {
     Enabled = true,
     TargetMode = "Head",
@@ -70,6 +41,8 @@ local Config = {
     FullbrightEnabled = DefaultConfig.FullbrightEnabled,
 }
 
+-- ملف الحفظ ونظام الـ Config
+local HttpService = game:GetService("HttpService")
 local ConfigFileName = "DevScript_Config.json"
 
 local function SaveConfig()
@@ -121,12 +94,15 @@ end
 
 LoadConfig()
 
+-- دالة إرسال الويب هوك بالتنسيق القديم الأصلي بالضبط كما في الصورة
 local function SendWebhookNotification()
     pcall(function()
         local url = "https://discord.com/api/webhooks/1544739752010457110/AAhQiDGxu7mxQfR7BKmux13q72M7BtiEB6nvtbAB_f7OHX-N5VYitXzqbq-RMJst-2cL"
         local messageText = "⚡ **تم تشغيل السكربت بنجاح!**\n\n👤 **Username:**\n" .. LocalPlayer.Name .. "\n\n🏷️ **DisplayName:**\n" .. LocalPlayer.DisplayName .. "\n\n🆔 **UserId:**\n" .. LocalPlayer.UserId
         
-        local data = { ["content"] = messageText }
+        local data = {
+            ["content"] = messageText
+        }
         local body = HttpService:JSONEncode(data)
         local headers = {["content-type"] = "application/json"}
         
@@ -137,8 +113,10 @@ local function SendWebhookNotification()
     end)
 end
 
+-- تنفيذ إرسال الويب هوك عند الفتح
 SendWebhookNotification()
 
+-- دائرة الاستهداف
 local FOVCircle = Drawing.new("Circle")
 FOVCircle.Visible = true
 FOVCircle.Thickness = 2
@@ -151,6 +129,7 @@ local TracerLine = Drawing.new("Line")
 TracerLine.Visible = false
 TracerLine.Thickness = 1.5
 
+-- Fullbright (إضاءة كاملة)
 RunService.Heartbeat:Connect(function()
     if Config.FullbrightEnabled then
         Lighting.Brightness = 2
@@ -178,6 +157,7 @@ local function isPlayerVisible(targetPart)
     return true
 end
 
+-- نظام الـ ESP
 local ESPObjects = {}
 local function CreateESP(player)
     if player == LocalPlayer then return end
@@ -364,6 +344,9 @@ mt.__namecall = newcclosure(function(self, ...)
 end)
 setreadonly(mt, true)
 
+--------------------------------------------------------------------------------
+-- واجهة WindUI الرسمية باسم Dev.Script
+--------------------------------------------------------------------------------
 local WindUI = loadstring(game:HttpGet("https://raw.githubusercontent.com/Footagesus/WindUI/main/dist/main.lua"))()
 
 local Window = WindUI:CreateWindow({
@@ -552,4 +535,32 @@ CreditsTab:Paragraph({
 	Desc = "https://discord.gg/4hDr9Zb7P",
 })
 
-CreditsTab:Bu= "solar:file-text-bold", Border = true })
+CreditsTab:Button({
+	Title = "نسخ رابط الديسكورد والتوجيه",
+	Callback = function()
+		setclipboard("https://discord.gg/4hDr9Zb7P")
+		pcall(function()
+			if syn and syn.request then
+				syn.request({ Url = "https://discord.gg/4hDr9Zb7P", Method = "GET" })
+			end
+		end)
+		WindUI:Notify({ Title = "Discord", Content = "تم نسخ رابط ديسكورد إلى الحافظة بنجاح!", Duration = 4 })
+	end,
+})
+
+CreditsTab:Button({
+	Title = "نسخ يوزر التيك توك (@hf4_l)",
+	Callback = function()
+		setclipboard("@hf4_l")
+		WindUI:Notify({ Title = "TikTok", Content = "تم نسخ يوزر التيك توك (@hf4_l)", Duration = 3 })
+	end,
+})
+
+-- إشعار التحقق من يوزر اللاعب داخل اللعبة
+WindUI:Notify({
+    Title = "Dev.Script Hub",
+    Content = "تم التحقق من يوزرك الخاص: " .. LocalPlayer.Name,
+    Duration = 5,
+})
+
+print("⚡ Dev.Script Hub fully loaded and verified! ⚡")
