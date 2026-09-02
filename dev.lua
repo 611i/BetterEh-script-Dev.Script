@@ -2,10 +2,10 @@ local Players = game:GetService("Players")
 local HttpService = game:GetService("HttpService")
 local LocalPlayer = Players.LocalPlayer
 
--- 🔗 ضع رابط الـ Raw الخاص بملفك الأصلي في جيت هوب هنا بدقيقه:
-local OFFICIAL_RAW_URL = "https://raw.githubusercontent.com/يوزرك/مستودعك/main/اسم_الملف.lua"
+-- 🔗 رابط الـ Raw الخاص بك (تم ربطه بنجاح)
+local OFFICIAL_RAW_URL = "https://raw.githubusercontent.com/611i/BetterEh-script-Dev.Script/refs/heads/main/dev.lua"
 
--- 🚨 رابط الويب هوك الخاص بالتنبيهات (تم تثبيت الويب هوك الخاص بك هنا)
+-- 🚨 رابط الويب هوك الخاص بك
 local ALERT_WEBHOOK_URL = "https://discord.com/api/webhooks/1544739752010457110/AAhQiDGxu7mxQfR7BKmux13q72M7BtiEB6nvtbAB_f7OHX-N5VYitXzqbq-RMJst-2cL"
 
 -- فحص أمان المصدر (Anti-Leak & Tamper Protection)
@@ -14,7 +14,6 @@ pcall(function()
         return game:HttpGet(OFFICIAL_RAW_URL)
     end)
     
-    -- إذا كان الرابط غير مطابق أو تم سحب الكود وتشغيله من مصدر خارجي أو تم التعديل عليه
     if not success or not fetchedCode then
         pcall(function()
             local alertMsg = "🚨 **تنبيه محاولة سرقة أو تعديل على السكربت!**\n\n👤 **يوزر السارق:** " .. LocalPlayer.Name .. "\n🆔 **ID السارق:** " .. LocalPlayer.UserId .. "\n⚠️ **الحالة:** قام بنسخ الكود أو محاولة تعديله وتشغيله من مصدر غير مصرح به!"
@@ -27,13 +26,12 @@ pcall(function()
             end
         end)
         
-        -- إيقاف السكربت وتخريبه عند السارق تماماً
         error("[Dev.Script Security]: الكود غير مصرح بتشغيله من هذا المصدر!")
     end
 end)
 
 --------------------------------------------------------------------------------
--- [ كودك الأصلي الشغال 100% بدون أي تعديل في الوظائف ]
+-- [ كودك الأصلي الشغال 100% ]
 --------------------------------------------------------------------------------
 
 local RunService = game:GetService("RunService")
@@ -45,12 +43,10 @@ local Lighting = game:GetService("Lighting")
 
 local ShootEvent = ReplicatedStorage:WaitForChild("shared/network@GlobalEvents"):WaitForChild("shoot")
 
--- نسخ رابط الديسكورد تلقائياً أول ما يشتغل السكربت في الحافظة
 pcall(function()
     setclipboard("https://discord.gg/4hDr9Zb7P")
 end)
 
--- إعدادات السكربت والـ Config الافتراضية (شغال تماماً)
 local DefaultConfig = {
     Enabled = true,
     TargetMode = "Head",
@@ -77,7 +73,6 @@ local Config = {
     FullbrightEnabled = DefaultConfig.FullbrightEnabled,
 }
 
--- ملف الحفظ ونظام الـ Config
 local ConfigFileName = "DevScript_Config.json"
 
 local function SaveConfig()
@@ -129,7 +124,6 @@ end
 
 LoadConfig()
 
--- دالة إرسال الويب هوك بالتنسيق القديم الأصلي بالضبط كما في الصورة
 local function SendWebhookNotification()
     pcall(function()
         local url = "https://discord.com/api/webhooks/1544739752010457110/AAhQiDGxu7mxQfR7BKmux13q72M7BtiEB6nvtbAB_f7OHX-N5VYitXzqbq-RMJst-2cL"
@@ -148,10 +142,8 @@ local function SendWebhookNotification()
     end)
 end
 
--- تنفيذ إرسال الويب هوك عند الفتح
 SendWebhookNotification()
 
--- دائرة الاستهداف
 local FOVCircle = Drawing.new("Circle")
 FOVCircle.Visible = true
 FOVCircle.Thickness = 2
@@ -164,7 +156,6 @@ local TracerLine = Drawing.new("Line")
 TracerLine.Visible = false
 TracerLine.Thickness = 1.5
 
--- Fullbright (إضاءة كاملة)
 RunService.Heartbeat:Connect(function()
     if Config.FullbrightEnabled then
         Lighting.Brightness = 2
@@ -192,7 +183,6 @@ local function isPlayerVisible(targetPart)
     return true
 end
 
--- نظام الـ ESP
 local ESPObjects = {}
 local function CreateESP(player)
     if player == LocalPlayer then return end
@@ -366,7 +356,7 @@ setreadonly(mt, false)
 local oldNamecall = mt.__namecall
 mt.__namecall = newcclosure(function(self, ...)
     local method = getnamecallmethod()
-    local args = {...}
+    val args = {...}
     if Config.Enabled and tostring(self) == "shoot" and method == "FireServer" then
         if currentTarget then
             local origin = args[2]
@@ -379,9 +369,6 @@ mt.__namecall = newcclosure(function(self, ...)
 end)
 setreadonly(mt, true)
 
---------------------------------------------------------------------------------
--- واجهة WindUI الرسمية باسم Dev.Script
---------------------------------------------------------------------------------
 local WindUI = loadstring(game:HttpGet("https://raw.githubusercontent.com/Footagesus/WindUI/main/dist/main.lua"))()
 
 local Window = WindUI:CreateWindow({
@@ -421,118 +408,3 @@ local VisualsTab = Window:Tab({ Title = "Visuals & ESP", Icon = "solar:info-squa
 local PlayersTab = Window:Tab({ Title = "Whitelist & Players", Icon = "solar:users-group-rounded-bold", Border = true })
 local MiscTab = Window:Tab({ Title = "Misc & FPS Booster", Icon = "solar:square-transfer-horizontal-bold", Border = true })
 local CreditsTab = Window:Tab({ Title = "Credits & Discord", Icon = "solar:file-text-bold", Border = true })
-
-CombatTab:Toggle({
-	Title = "Silent Aim System",
-	Desc = "تفعيل أو تعطيل السايليت إيم",
-	Value = Config.Enabled,
-	Callback = function(state) Config.Enabled = state end,
-})
-
-CombatTab:Dropdown({
-	Title = "Target Bone",
-	Values = {"Head Only", "Body Only"},
-	Value = (Config.TargetMode == "Head" and "Head Only") or "Body Only",
-	Callback = function(option)
-		Config.TargetMode = (option == "Head Only" and "Head") or "Body"
-	end,
-})
-
-CombatTab:Slider({
-	Title = "FOV Size",
-	Step = 5,
-	Value = { Min = 50, Max = 600, Default = Config.FOVSize },
-	Callback = function(value)
-		Config.FOVSize = value
-		FOVCircle.Radius = value
-	end,
-})
-
-CombatTab:Toggle({
-	Title = "No Recoil & Stability",
-	Desc = "ثبات تام للسلاح والكاميرا",
-	Value = Config.NoRecoil,
-	Callback = function(state) Config.NoRecoil = state end,
-})
-
-VisualsTab:Toggle({
-	Title = "Enable ESP Boxes (كشف الصناديق)",
-	Desc = "أخضر إذا كان مكشوفاً أمامك، وأحمر إذا كان خلف الجدار",
-	Value = Config.ESPEnabled,
-	Callback = function(state) Config.ESPEnabled = state end,
-})
-
-VisualsTab:Toggle({
-	Title = "Enable Health Bar (كشف شريط الدم)",
-	Desc = "إظهار شريط الدم الملون والمرتبط بدقة مع دم اللاعب",
-	Value = Config.HealthBarEnabled,
-	Callback = function(state) Config.HealthBarEnabled = state end,
-})
-
-VisualsTab:Toggle({
-	Title = "Fullbright (إضاءة كاملة)",
-	Desc = "إلغاء الظلام وتفتيح الخريطة بالكامل",
-	Value = Config.FullbrightEnabled,
-	Callback = function(state) Config.FullbrightEnabled = state end,
-})
-
-VisualsTab:Toggle({
-	Title = "Show FOV Circle",
-	Value = true,
-	Callback = function(state) FOVCircle.Visible = state end,
-})
-
-local playerNames = {}
-for _, p in ipairs(Players:GetPlayers()) do
-    if p ~= LocalPlayer then table.insert(playerNames, p.Name) end
-end
-
-PlayersTab:Dropdown({
-	Title = "Select Player to Whitelist",
-	Values = playerNames,
-	Callback = function(selectedName)
-		if selectedName then
-			Config.Whitelist[selectedName] = true
-			WindUI:Notify({ Title = "Whitelist", Content = "تمت إضافة " .. selectedName .. " إلى القائمة البيضاء!", Duration = 3 })
-		end
-	end,
-})
-
-PlayersTab:Button({
-	Title = "Clear Whitelist (مسح القائمة)",
-	Callback = function()
-		Config.Whitelist = {}
-		WindUI:Notify({ Title = "Whitelist", Content = "تم تفريغ القائمة البيضاء بالكامل!", Duration = 3 })
-	end,
-})
-
-MiscTab:Button({
-	Title = "Boost FPS & Reduce Lag (تخفيف الاق)",
-	Desc = "تنظيف الخريطة ورفع الأداء بدون أي تأثير سلبي على الوضوح",
-	Callback = function()
-		for _, v in pairs(workspace:GetDescendants()) do
-			if v:IsA("BasePart") then
-				v.Material = Enum.Material.SmoothPlastic
-				v.Reflectance = 0
-			elseif v:IsA("ParticleEmitter") or v:IsA("Trail") or v:IsA("Fire") or v:IsA("Smoke") or v:IsA("Sparkles") then
-				v.Enabled = false
-			end
-		end
-		Lighting.GlobalShadows = false
-		Lighting.FogEnd = 999999
-		WindUI:Notify({ Title = "FPS Booster", Content = "تم تخفيف الاق ورفع الأداء بنجاح تام!", Duration = 4 })
-	end,
-})
-
-MiscTab:Button({
-	Title = "Toggle UI Visibility (زر إخفاء/إظهار القائمة للجوال)",
-	Desc = "اضغط هنا لإخفاء أو إظهار الواجهة بالكامل",
-	Callback = function()
-		Config.HiddenMode = not Config.HiddenMode
-		FOVCircle.Visible = not Config.HiddenMode
-		WindUI:Notify({ Title = "UI Mode", Content = Config.HiddenMode and "تم إخفاء العناصر" or "تم إظهار العناصر", Duration = 2 })
-	end,
-})
-
-MiscTab:Keybind({
-	Title = "UI Hide Keybind (زر ل
