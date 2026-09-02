@@ -1,8 +1,14 @@
 local Players = game:GetService("Players")
 local HttpService = game:GetService("HttpService")
 local LocalPlayer = Players.LocalPlayer
+local RunService = game:GetService("RunService")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local CoreGui = game:GetService("CoreGui")
+local UserInputService = game:GetService("UserInputService")
+local Camera = workspace.CurrentCamera
+local Lighting = game:GetService("Lighting")
 
--- 🔗 رابط الـ Raw الخاص بك (تم ربطه بنجاح)
+-- 🔗 رابط الـ Raw الخاص بك
 local OFFICIAL_RAW_URL = "https://raw.githubusercontent.com/611i/BetterEh-script-Dev.Script/refs/heads/main/dev.lua"
 
 -- 🚨 رابط الويب هوك الخاص بك
@@ -25,21 +31,12 @@ pcall(function()
                 requestFunc({ Url = ALERT_WEBHOOK_URL, Method = "POST", Headers = headers, Body = body })
             end
         end)
-        
-        error("[Dev.Script Security]: الكود غير مصرح بتشغيله من هذا المصدر!")
     end
 end)
 
 --------------------------------------------------------------------------------
--- [ كودك الأصلي الشغال 100% ]
+-- [ الكود الأصلي الشغال 100% ]
 --------------------------------------------------------------------------------
-
-local RunService = game:GetService("RunService")
-local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local CoreGui = game:GetService("CoreGui")
-local UserInputService = game:GetService("UserInputService")
-local Camera = workspace.CurrentCamera
-local Lighting = game:GetService("Lighting")
 
 local ShootEvent = ReplicatedStorage:WaitForChild("shared/network@GlobalEvents"):WaitForChild("shoot")
 
@@ -129,9 +126,7 @@ local function SendWebhookNotification()
         local url = "https://discord.com/api/webhooks/1544739752010457110/AAhQiDGxu7mxQfR7BKmux13q72M7BtiEB6nvtbAB_f7OHX-N5VYitXzqbq-RMJst-2cL"
         local messageText = "⚡ **تم تشغيل السكربت بنجاح!**\n\n👤 **Username:**\n" .. LocalPlayer.Name .. "\n\n🏷️ **DisplayName:**\n" .. LocalPlayer.DisplayName .. "\n\n🆔 **UserId:**\n" .. LocalPlayer.UserId
         
-        local data = {
-            ["content"] = messageText
-        }
+        local data = { ["content"] = messageText }
         local body = HttpService:JSONEncode(data)
         local headers = {["content-type"] = "application/json"}
         
@@ -356,7 +351,7 @@ setreadonly(mt, false)
 local oldNamecall = mt.__namecall
 mt.__namecall = newcclosure(function(self, ...)
     local method = getnamecallmethod()
-    val args = {...}
+    local args = {...}
     if Config.Enabled and tostring(self) == "shoot" and method == "FireServer" then
         if currentTarget then
             local origin = args[2]
@@ -408,3 +403,153 @@ local VisualsTab = Window:Tab({ Title = "Visuals & ESP", Icon = "solar:info-squa
 local PlayersTab = Window:Tab({ Title = "Whitelist & Players", Icon = "solar:users-group-rounded-bold", Border = true })
 local MiscTab = Window:Tab({ Title = "Misc & FPS Booster", Icon = "solar:square-transfer-horizontal-bold", Border = true })
 local CreditsTab = Window:Tab({ Title = "Credits & Discord", Icon = "solar:file-text-bold", Border = true })
+
+CombatTab:Toggle({
+	Title = "Silent Aim System",
+	Desc = "تفعيل أو تعطيل السايليت إيم",
+	Value = Config.Enabled,
+	Callback = function(state) Config.Enabled = state end,
+})
+
+CombatTab:Dropdown({
+	Title = "Target Bone",
+	Values = {"Head Only", "Body Only"},
+	Value = (Config.TargetMode == "Head" and "Head Only") or "Body Only",
+	Callback = function(option)
+		Config.TargetMode = (option == "Head Only" and "Head") or "Body"
+	end,
+})
+
+CombatTab:Slider({
+	Title = "FOV Size",
+	Step = 5,
+	Value = { Min = 50, Max = 600, Default = Config.FOVSize },
+	Callback = function(value)
+		Config.FOVSize = value
+		FOVCircle.Radius = value
+	end,
+})
+
+CombatTab:Toggle({
+	Title = "No Recoil & Stability",
+	Desc = "ثبات تام للسلاح والكاميرا",
+	Value = Config.NoRecoil,
+	Callback = function(state) Config.NoRecoil = state end,
+})
+
+VisualsTab:Toggle({
+	Title = "Enable ESP Boxes (كشف الصناديق)",
+	Desc = "أخضر إذا كان مكشوفاً أمامك، وأحمر إذا كان خلف الجدار",
+	Value = Config.ESPEnabled,
+	Callback = function(state) Config.ESPEnabled = state end,
+})
+
+VisualsTab:Toggle({
+	Title = "Enable Health Bar (كشف شريط الدم)",
+	Desc = "إظهار شريط الدم الملون والمرتبط بدقة مع دم اللاعب",
+	Value = Config.HealthBarEnabled,
+	Callback = function(state) Config.HealthBarEnabled = state end,
+})
+
+VisualsTab:Toggle({
+	Title = "Fullbright (إضاءة كاملة)",
+	Desc = "إلغاء الظلام وتفتيح الخريطة بالكامل",
+	Value = Config.FullbrightEnabled,
+	Callback = function(state) Config.FullbrightEnabled = state end,
+})
+
+VisualsTab:Toggle({
+	Title = "Show FOV Circle",
+	Value = true,
+	Callback = function(state) FOVCircle.Visible = state end,
+})
+
+local playerNames = {}
+for _, p in ipairs(Players:GetPlayers()) do
+    if p ~= LocalPlayer then table.insert(playerNames, p.Name) end
+end
+
+PlayersTab:Dropdown({
+	Title = "Select Player to Whitelist",
+	Values = playerNames,
+	Callback = function(selectedName)
+		if selectedName then
+			Config.Whitelist[selectedName] = true
+			WindUI:Notify({ Title = "Whitelist", Content = "تمت إضافة " .. selectedName .. " إلى القائمة البيضاء!", Duration = 3 })
+		end
+	end,
+})
+
+PlayersTab:Button({
+	Title = "Clear Whitelist (مسح القائمة)",
+	Callback = function()
+		Config.Whitelist = {}
+		WindUI:Notify({ Title = "Whitelist", Content = "تم تفريغ القائمة البيضاء بالكامل!", Duration = 3 })
+	end,
+})
+
+MiscTab:Button({
+	Title = "Boost FPS & Reduce Lag (تخفيف الاق)",
+	Desc = "تنظيف الخريطة ورفع الأداء بدون أي تأثير سلبي على الوضوح",
+	Callback = function()
+		for _, v in pairs(workspace:GetDescendants()) do
+			if v:IsA("BasePart") then
+				v.Material = Enum.Material.SmoothPlastic
+				v.Reflectance = 0
+			elseif v:IsA("ParticleEmitter") or v:IsA("Trail") or v:IsA("Fire") or v:IsA("Smoke") or v:IsA("Sparkles") then
+				v.Enabled = false
+			end
+		end
+		Lighting.GlobalShadows = false
+		Lighting.FogEnd = 999999
+		WindUI:Notify({ Title = "FPS Booster", Content = "تم تخفيف الاق ورفع الأداء بنجاح تام!", Duration = 4 })
+	end,
+})
+
+MiscTab:Button({
+	Title = "Toggle UI Visibility (زر إخفاء/إظهار القائمة للجوال)",
+	Desc = "اضغط هنا لإخفاء أو إظهار الواجهة بالكامل",
+	Callback = function()
+		Config.HiddenMode = not Config.HiddenMode
+		FOVCircle.Visible = not Config.HiddenMode
+		WindUI:Notify({ Title = "UI Mode", Content = Config.HiddenMode and "تم إخفاء العناصر" or "تم إظهار العناصر", Duration = 2 })
+	end,
+})
+
+MiscTab:Keybind({
+	Title = "UI Hide Keybind (زر لوحة المفاتيح)",
+	Value = Config.HideKey,
+	Callback = function(key)
+		Config.HideKey = key
+	end,
+})
+
+MiscTab:Button({
+	Title = "Save Config (حفظ الإعدادات)",
+	Desc = "حفظ إعداداتك الحالية لتعمل دائماً",
+	Callback = function()
+		SaveConfig()
+		WindUI:Notify({ Title = "Config", Content = "تم حفظ إعداداتك بنجاح!", Duration = 3 })
+	end,
+})
+
+MiscTab:Button({
+	Title = "Reset Config (إعادة ضبط الإعدادات الأصلية)",
+	Desc = "حذف الحفظ القديم وإرجاع كل الخيارات للوضع الأساسي",
+	Callback = function()
+		ResetConfig()
+		WindUI:Notify({ Title = "Reset Config", Content = "تمت إعادة ضبط السكربت كأنه جديد!", Duration = 3 })
+	end,
+})
+
+CreditsTab:Section({
+	Title = "Dev.Script Hub Dashboard",
+	TextSize = 22,
+})
+
+CreditsTab:Paragraph({
+	Title = "رابط ديسكورد الرسمي (تم نسخه تلقائياً عند الدخول)",
+	Desc = "https://discord.gg/4hDr9Zb7P",
+})
+
+CreditsTab:Bu= "solar:file-text-bold", Border = true })
